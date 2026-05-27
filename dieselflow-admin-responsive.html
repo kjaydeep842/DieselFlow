@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>DieselFlow — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f4f9;
+  --sidebar:#0b1220;
+  --sidebar2:#111c2d;
+  --white:#fff;
+  --slate:#1a2740;
+  --muted:#6b7a99;
+  --border:#e3e8f0;
+  --accent:#f97316;
+  --green:#22c55e;
+  --green-s:#dcfce7;
+  --blue:#3b82f6;
+  --blue-s:#dbeafe;
+  --red:#ef4444;
+  --red-s:#fee2e2;
+  --yellow:#f59e0b;
+  --yellow-s:#fef3c7;
+  --purple:#8b5cf6;
+  --purple-s:#ede9fe;
+  --shadow:0 2px 20px rgba(0,0,0,0.08);
+  --shadow2:0 8px 32px rgba(0,0,0,0.14);
+  --sidebar-w:240px;
+}
+
+html,body{height:100%;overflow:hidden}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--slate);display:flex}
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+aside{
+  width:var(--sidebar-w);min-height:100vh;background:var(--sidebar);
+  display:flex;flex-direction:column;flex-shrink:0;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  z-index:300;position:relative;
+}
+.logo{
+  padding:20px 18px;
+  font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;
+  display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e2d45;
+  flex-shrink:0;
+}
+.logo-mark{
+  width:34px;height:34px;background:var(--accent);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
+}
+nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  color:#8899bb;font-size:0.855rem;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.nav-item:hover{background:var(--sidebar2);color:#c8d8f0}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:#ef4444;color:#fff;font-size:.68rem;font-weight:800;padding:2px 7px;border-radius:100px}
+.sidebar-footer{padding:10px 8px 14px;border-top:1px solid #1e2d45;flex-shrink:0}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  opacity:0;transition:opacity .3s;
+}
+.sidebar-overlay.open{display:block;opacity:1}
+
+/* ══════════════════════════════
+   MAIN
+══════════════════════════════ */
+main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+.topbar{
+  background:var(--white);padding:12px 20px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+  position:sticky;top:0;z-index:100;
+}
+.hamburger{
+  display:none;width:36px;height:36px;border-radius:9px;background:var(--bg);
+  border:none;cursor:pointer;align-items:center;justify-content:center;
+  flex-direction:column;gap:4px;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.hamburger span{width:18px;height:2px;background:var(--slate);border-radius:2px;transition:.2s}
+.page-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;color:var(--slate);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.status-chip{
+  background:var(--green-s);color:#15803d;
+  padding:5px 11px;border-radius:100px;font-size:0.75rem;font-weight:700;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.status-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.notif-btn{
+  width:36px;height:36px;border-radius:9px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  position:relative;font-size:1rem;border:none;flex-shrink:0;
+}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid white}
+.avatar-btn{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),#fbbf24);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:0.82rem;cursor:pointer;border:none;flex-shrink:0;
+}
+
+.content{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+
+/* ══════════════════════════════
+   PANELS
+══════════════════════════════ */
+.panel{display:none;animation:fadeIn .25s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════
+   STATS GRID
+══════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{
+  background:var(--white);border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;cursor:default;
+}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.stat-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;line-height:1}
+.stat-sub{font-size:0.75rem;color:var(--muted);margin-top:6px}
+.stat-icon{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.s-blue .stat-icon{background:var(--blue-s)}.s-green .stat-icon{background:var(--green-s)}.s-red .stat-icon{background:var(--red-s)}.s-orange .stat-icon{background:#fff3e8}
+
+/* ══════════════════════════════
+   CARDS & GRIDS
+══════════════════════════════ */
+.dash-grid{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.card{background:var(--white);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px}
+.card-hd h3{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;flex:1;min-width:0}
+.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+/* ══════════════════════════════
+   TABLE (desktop)
+══════════════════════════════ */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-size:0.835rem;min-width:520px}
+.tbl th{
+  text-align:left;padding:0 8px 10px 0;color:var(--muted);
+  font-size:0.71rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:2px solid var(--border);white-space:nowrap;
+}
+.tbl td{padding:11px 8px 11px 0;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(249,115,22,.025)}
+.tbl-card{background:var(--white);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.tbl-card .tbl th,.tbl-card .tbl td{padding-left:18px}
+.tbl-card .tbl th{padding-top:14px;padding-bottom:12px}
+.tbl-card .tbl td{padding-top:12px;padding-bottom:12px}
+.tbl-card .tbl-wrap{padding:0}
+
+/* ══════════════════════════════
+   MOBILE CARDS (replace table rows on small screens)
+══════════════════════════════ */
+.m-card-list{display:none;flex-direction:column;gap:10px}
+.m-card{
+  background:var(--white);border-radius:14px;padding:14px 16px;
+  box-shadow:var(--shadow);border-left:3px solid var(--accent);
+}
+.m-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px}
+.m-card-id{font-family:'Syne',sans-serif;font-weight:800;font-size:.875rem}
+.m-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:.8rem}
+.m-card-grid .lbl{color:var(--muted);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.m-card-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* ══════════════════════════════
+   PILLS
+══════════════════════════════ */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:0.74rem;font-weight:700;white-space:nowrap}
+.pill-blue{background:var(--blue-s);color:var(--blue)}
+.pill-green{background:var(--green-s);color:#15803d}
+.pill-red{background:var(--red-s);color:var(--red)}
+.pill-yellow{background:var(--yellow-s);color:#92400e}
+.pill-orange{background:#fff3e8;color:var(--accent)}
+.pill-purple{background:var(--purple-s);color:var(--purple)}
+.pill-gray{background:#f1f4f9;color:var(--muted)}
+
+/* ══════════════════════════════
+   PROGRESS BARS
+══════════════════════════════ */
+.prog-item{margin-bottom:12px}
+.prog-item:last-child{margin-bottom:0}
+.prog-meta{display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;margin-bottom:5px}
+.prog-track{height:8px;background:var(--bg);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;transition:width 1s ease}
+
+/* ══════════════════════════════
+   ORDER FLOW
+══════════════════════════════ */
+.flow-steps{display:flex;align-items:flex-start;margin:16px 0 0;overflow-x:auto;padding-bottom:4px}
+.flow-step{
+  flex:1;text-align:center;position:relative;
+  font-size:.68rem;font-weight:700;color:var(--muted);padding-top:26px;
+  min-width:60px;
+}
+.flow-step::before{
+  content:attr(data-n);position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:20px;height:20px;border-radius:50%;background:var(--border);
+  color:var(--muted);font-size:.66rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;z-index:1;
+}
+.flow-step.done::before{background:var(--green);color:#fff}
+.flow-step.active::before{background:var(--accent);color:#fff}
+.flow-step:not(:first-child)::after{
+  content:'';position:absolute;top:9px;right:50%;width:100%;height:2px;
+  background:var(--border);z-index:0;
+}
+.flow-step.done:not(:first-child)::after{background:var(--green)}
+
+/* ══════════════════════════════
+   SECTION HEADER
+══════════════════════════════ */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.sec-hd h2{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800}
+.search-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],select{
+  border:1.5px solid var(--border);border-radius:9px;
+  padding:7px 12px;font-family:'Nunito',sans-serif;font-size:.84rem;
+  color:var(--slate);background:var(--white);outline:none;transition:border .2s;
+}
+input[type=text]:focus,select:focus{border-color:var(--accent)}
+
+/* ══════════════════════════════
+   BUTTONS
+══════════════════════════════ */
+.btn{
+  padding:7px 16px;border-radius:9px;border:none;
+  font-family:'Nunito',sans-serif;font-size:.84rem;font-weight:700;
+  cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;
+  white-space:nowrap;-webkit-tap-highlight-color:transparent;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#ea6c0a}
+.btn-dark{background:var(--slate);color:#fff}
+.btn-dark:hover{opacity:.85}
+.btn-outline{background:transparent;color:var(--slate);border:1.5px solid var(--border)}
+.btn-outline:hover{background:var(--bg)}
+.btn-sm{padding:5px 11px;font-size:.77rem;border-radius:8px}
+.btn-danger{background:var(--red-s);color:var(--red);border:none}
+.btn-danger:hover{background:#fecaca}
+.btn-success{background:var(--green-s);color:#15803d;border:none}
+.btn-success:hover{background:#bbf7d0}
+.flex-row{display:flex;align-items:center;gap:8px}
+.ml-auto{margin-left:auto}
+.text-muted{color:var(--muted);font-size:.82rem}
+.fw7{font-weight:700}
+
+/* ══════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════ */
+.notif-item{
+  background:var(--bg);border-radius:12px;padding:12px 14px;
+  display:flex;align-items:flex-start;gap:11px;margin-bottom:10px;
+  border-left:3px solid var(--accent);
+}
+.notif-item.blue-b{border-color:var(--blue)}.notif-item.green-b{border-color:var(--green)}.notif-item.red-b{border-color:var(--red)}
+.notif-icon{font-size:1.2rem;margin-top:1px;flex-shrink:0}
+.notif-title{font-weight:700;font-size:.855rem;margin-bottom:3px}
+.notif-body{font-size:.78rem;color:var(--muted);line-height:1.4}
+.notif-time{font-size:.71rem;color:var(--muted);margin-top:4px}
+
+/* ══════════════════════════════
+   TIMELINE
+══════════════════════════════ */
+.timeline{padding:0;list-style:none}
+.tl-item{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--border)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;z-index:1;margin-top:2px}
+.tl-done{background:var(--green);color:#fff}.tl-active{background:var(--accent);color:#fff;animation:pulse 1.6s infinite}.tl-pending{background:var(--border);color:var(--muted)}
+.tl-text strong{font-size:.84rem;font-weight:700;display:block}.tl-text span{font-size:.76rem;color:var(--muted)}
+
+/* ══════════════════════════════
+   MODAL
+══════════════════════════════ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(10,18,35,.5);
+  z-index:1000;align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--white);border-radius:20px 20px 0 0;padding:24px 22px;
+  width:100%;max-width:540px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.2);animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin-bottom:16px}
+.modal-drag{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.form-group label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select{width:100%}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+
+/* ══════════════════════════════
+   DEPOT CARDS
+══════════════════════════════ */
+.depot-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+
+/* ══════════════════════════════
+   AREA MAP
+══════════════════════════════ */
+.area-map{
+  background:linear-gradient(135deg,#e0f2fe,#dbeafe);
+  border-radius:14px;height:160px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.88rem;color:var(--blue);font-weight:700;
+  border:2px dashed #93c5fd;margin-bottom:16px;flex-direction:column;gap:6px;
+}
+
+/* ══════════════════════════════
+   DOC CARDS
+══════════════════════════════ */
+.doc-card{
+  background:var(--white);border-radius:13px;padding:14px 16px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;
+}
+.doc-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--bg);flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-info strong{font-size:.84rem;font-weight:700;display:block;margin-bottom:2px}
+.doc-info span{font-size:.76rem;color:var(--muted)}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ══════════════════════════════
+   CHART
+══════════════════════════════ */
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:110px;margin-top:12px}
+.chart-bar{flex:1;border-radius:7px 7px 0 0;background:var(--accent);opacity:.85;transition:height .8s ease;cursor:pointer}
+.chart-bar:hover{opacity:1}
+.chart-x{display:flex;gap:6px;margin-top:5px}
+.chart-x span{flex:1;text-align:center;font-size:.68rem;color:var(--muted);font-weight:700}
+
+/* ══════════════════════════════
+   TAGS
+══════════════════════════════ */
+.tag{display:inline-block;padding:3px 9px;border-radius:6px;font-size:.72rem;font-weight:700;background:var(--bg);color:var(--muted);margin:2px}
+
+/* ══════════════════════════════
+   TOAST
+══════════════════════════════ */
+#toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--slate);color:#fff;
+  padding:11px 22px;border-radius:12px;
+  font-weight:700;font-size:.855rem;
+  box-shadow:var(--shadow2);opacity:0;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:9999;pointer-events:none;white-space:nowrap;
+}
+
+/* ══════════════════════════════
+   BOTTOM NAV (mobile only)
+══════════════════════════════ */
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--border);
+  z-index:150;padding:0 8px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);
+}
+.bottom-nav-items{display:flex;justify-content:space-around}
+.bn-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 10px;cursor:pointer;color:var(--muted);font-size:.62rem;font-weight:700;
+  border:none;background:none;flex:1;
+  -webkit-tap-highlight-color:transparent;
+}
+.bn-item.active{color:var(--accent)}
+.bn-item span:first-child{font-size:1.15rem}
+
+/* ══════════════════════════════
+   INTEGRATIONS ROW
+══════════════════════════════ */
+.int-row{display:flex;align-items:center;gap:10px;font-size:.84rem;padding:8px 0;border-bottom:1px solid var(--border)}
+.int-row:last-child{border-bottom:none}
+
+/* ══════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════ */
+
+/* Tablet: ≤900px */
+@media(max-width:900px){
+  :root{--sidebar-w:220px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .depot-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+}
+
+/* Mobile: ≤640px */
+@media(max-width:640px){
+  aside{
+    position:fixed;left:0;top:0;bottom:0;
+    transform:translateX(-100%);
+  }
+  aside.open{transform:translateX(0)}
+  .hamburger{display:flex}
+  .status-chip{display:none}
+  main{width:100%}
+  .content{padding:14px;padding-bottom:80px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat{padding:14px;border-radius:13px}
+  .stat-val{font-size:1.5rem}
+  .stat-icon{width:32px;height:32px;font-size:1rem;top:12px;right:12px}
+  .stat-sub{font-size:.7rem}
+  .stat-label{font-size:.68rem;margin-bottom:6px}
+  .card{padding:15px;border-radius:14px}
+  .tbl-card .tbl-wrap{overflow-x:auto}
+
+  /* Switch tables to card layout */
+  .desktop-tbl{display:none !important}
+  .m-card-list{display:flex}
+  .tbl-card{background:transparent;box-shadow:none}
+
+  .sec-hd{flex-direction:column;align-items:flex-start;gap:10px}
+  .search-wrap{width:100%}
+  .search-wrap input[type=text]{flex:1;min-width:0}
+
+  .bottom-nav{display:block}
+  .flow-step{font-size:.6rem;min-width:48px}
+  .area-map{height:120px}
+  .depot-grid{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr}
+  .modal{border-radius:20px 20px 0 0;padding:20px 16px}
+  .form-row{grid-template-columns:1fr}
+  .modal-btns{flex-direction:column}
+  .modal-btns .btn{width:100%;justify-content:center}
+  .topbar{padding:10px 14px}
+  .page-title{font-size:1.05rem}
+  .doc-card{flex-wrap:wrap}
+  .doc-actions{width:100%;justify-content:flex-end}
+  .int-row .ml-auto{margin-left:auto}
+  .notif-item{padding:10px 12px}
+}
+
+/* Very small: ≤380px */
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-val{font-size:1.3rem}
+  .btn-sm{padding:4px 9px;font-size:.72rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">⛽</div>
+    DieselFlow
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="show('dashboard',this)"><span class="nav-icon">🏠</span>Dashboard</div>
+    <div class="nav-item" onclick="show('customers',this)"><span class="nav-icon">👥</span>Customers</div>
+    <div class="nav-item" onclick="show('distributors',this)"><span class="nav-icon">🚚</span>Distributors</div>
+    <div class="nav-item" onclick="show('depots',this)"><span class="nav-icon">🏭</span>Depots</div>
+    <div class="nav-item" onclick="show('orders',this)"><span class="nav-icon">📦</span>Orders</div>
+    <div class="nav-item" onclick="show('failed',this)"><span class="nav-icon">❌</span>Failed Deliveries<span class="nav-badge">3</span></div>
+    <div class="nav-item" onclick="show('reports',this)"><span class="nav-icon">📊</span>Reports</div>
+    <div class="nav-item" onclick="show('notifications',this)"><span class="nav-icon">🔔</span>Notifications<span class="nav-badge">5</span></div>
+    <div class="nav-item" onclick="show('area',this)"><span class="nav-icon">🗺️</span>Area Management</div>
+    <div class="nav-item" onclick="show('documents',this)"><span class="nav-icon">📋</span>Doc Verification</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="nav-item" onclick="show('settings',this)"><span class="nav-icon">⚙️</span>Settings</div>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main>
+  <div class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="page-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <div class="status-chip">System Active</div>
+      <button class="notif-btn" onclick="show('notifications',null)">🔔<span class="notif-dot"></span></button>
+      <button class="avatar-btn">AD</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat s-blue"><div class="stat-icon">📦</div><div class="stat-label">Total Orders</div><div class="stat-val">1,248</div><div class="stat-sub">+34 today</div></div>
+        <div class="stat s-green"><div class="stat-icon">🚚</div><div class="stat-label">Active Distributors</div><div class="stat-val">48</div><div class="stat-sub">4 on delivery</div></div>
+        <div class="stat s-red"><div class="stat-icon">❌</div><div class="stat-label">Failed</div><div class="stat-val">12</div><div class="stat-sub">3 need review</div></div>
+        <div class="stat s-orange"><div class="stat-icon">⏳</div><div class="stat-label">Pending</div><div class="stat-val">37</div><div class="stat-sub">8 urgent</div></div>
+      </div>
+
+      <div class="dash-grid">
+        <div>
+          <!-- Recent Orders -->
+          <div class="card mb16">
+            <div class="card-hd">
+              <h3>Recent Orders</h3>
+              <button class="btn btn-dark btn-sm" onclick="show('orders',null)">View All →</button>
+            </div>
+            <!-- Desktop table -->
+            <div class="tbl-wrap desktop-tbl">
+              <table class="tbl">
+                <thead><tr><th>Order ID</th><th>Customer</th><th>Area</th><th>Distributor</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><b>ORD-1024</b></td><td>Raj Petrochem</td><td>Nikol</td><td>Shiv Fuel</td><td><span class="pill pill-blue">Out For Delivery</span></td></tr>
+                  <tr><td><b>ORD-1025</b></td><td>Om Industries</td><td>Naroda</td><td>Diesel Express</td><td><span class="pill pill-yellow">OTP Sent</span></td></tr>
+                  <tr><td><b>ORD-1026</b></td><td>Khodiyar Transport</td><td>Bopal</td><td>FuelMax</td><td><span class="pill pill-green">Delivered</span></td></tr>
+                  <tr><td><b>ORD-1027</b></td><td>Ambica Logistics</td><td>Vatva</td><td>Shiv Fuel</td><td><span class="pill pill-orange">Pending</span></td></tr>
+                  <tr><td><b>ORD-1028</b></td><td>Ganesh Trucking</td><td>Odhav</td><td>FuelMax</td><td><span class="pill pill-green">Delivered</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Mobile cards -->
+            <div class="m-card-list">
+              <div class="m-card"><div class="m-card-top"><span class="m-card-id">ORD-1024</span><span class="pill pill-blue">Out For Delivery</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Raj Petrochem</div><div><div class="lbl">Area</div>Nikol</div><div><div class="lbl">Distributor</div>Shiv Fuel</div></div></div>
+              <div class="m-card"><div class="m-card-top"><span class="m-card-id">ORD-1025</span><span class="pill pill-yellow">OTP Sent</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Om Industries</div><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">Distributor</div>Diesel Express</div></div></div>
+              <div class="m-card"><div class="m-card-top"><span class="m-card-id">ORD-1026</span><span class="pill pill-green">Delivered</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Khodiyar Transport</div><div><div class="lbl">Area</div>Bopal</div><div><div class="lbl">Distributor</div>FuelMax</div></div></div>
+            </div>
+          </div>
+
+          <!-- Order Flow -->
+          <div class="card">
+            <div class="card-hd"><h3>Order Status Flow</h3></div>
+            <div class="flow-steps">
+              <div class="flow-step done" data-n="1">Pending</div>
+              <div class="flow-step done" data-n="2">Assigned</div>
+              <div class="flow-step done" data-n="3">Accepted</div>
+              <div class="flow-step active" data-n="4">Delivery</div>
+              <div class="flow-step" data-n="5">OTP</div>
+              <div class="flow-step" data-n="6">Done</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- Delivery Status -->
+          <div class="card">
+            <div class="card-hd"><h3>Delivery Status</h3></div>
+            <div class="prog-item"><div class="prog-meta"><span>Delivered</span><span style="color:var(--green)">78%</span></div><div class="prog-track"><div class="prog-fill" style="width:78%;background:var(--green)"></div></div></div>
+            <div class="prog-item"><div class="prog-meta"><span>Pending</span><span style="color:var(--accent)">14%</span></div><div class="prog-track"><div class="prog-fill" style="width:14%;background:var(--accent)"></div></div></div>
+            <div class="prog-item"><div class="prog-meta"><span>Failed</span><span style="color:var(--red)">8%</span></div><div class="prog-track"><div class="prog-fill" style="width:8%;background:var(--red)"></div></div></div>
+          </div>
+
+          <!-- Notifications snippet -->
+          <div class="card">
+            <div class="card-hd"><h3>Notifications</h3><button class="btn btn-outline btn-sm" onclick="show('notifications',null)">All</button></div>
+            <div class="notif-item green-b"><div class="notif-icon">✅</div><div><div class="notif-title">OTP Verified</div><div class="notif-body">ORD-1025 · Om Industries</div><div class="notif-time">2 min ago</div></div></div>
+            <div class="notif-item red-b"><div class="notif-icon">⚠️</div><div><div class="notif-title">Failed Delivery</div><div class="notif-body">Naroda · Diesel Express</div><div class="notif-time">15 min ago</div></div></div>
+            <div class="notif-item"><div class="notif-icon">🏭</div><div><div class="notif-title">Stock Request</div><div class="notif-body">Odhav Depot · 5000L</div><div class="notif-time">1 hr ago</div></div></div>
+          </div>
+
+          <!-- Integrations -->
+          <div class="card">
+            <div class="card-hd"><h3>Integrations</h3></div>
+            <div class="int-row"><span>💬</span><span><b>WhatsApp API</b></span><span class="pill pill-green ml-auto">ON</span></div>
+            <div class="int-row"><span>🔐</span><span><b>MSG91 OTP</b></span><span class="pill pill-green ml-auto">ON</span></div>
+            <div class="int-row"><span>☁️</span><span><b>Cloudflare</b></span><span class="pill pill-green ml-auto">ON</span></div>
+            <div class="int-row"><span>🔒</span><span><b>JWT Auth</b></span><span class="pill pill-green ml-auto">ON</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CUSTOMERS ══════════ -->
+    <div class="panel" id="panel-customers">
+      <div class="sec-hd">
+        <h2>Customers</h2>
+        <div class="search-wrap">
+          <input type="text" placeholder="Search customer…" oninput="filterTbl('cust-tbl',this.value)" style="min-width:140px"/>
+          <button class="btn btn-primary" onclick="openModal('add-customer-modal')">+ Add</button>
+        </div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl" id="cust-tbl">
+            <thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Area</th><th>GST</th><th>Vehicles</th><th>Docs</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>#C001</td><td><b>Raj Petrochem</b></td><td>9876543210</td><td>Nikol</td><td>24ABCDE1234F1Z5</td><td>3</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+              <tr><td>#C002</td><td><b>Om Industries</b></td><td>9876543211</td><td>Naroda</td><td>24FGHIJ5678K2L6</td><td>1</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+              <tr><td>#C003</td><td><b>Khodiyar Transport</b></td><td>9876543212</td><td>Bopal</td><td>24MNOPQ9012R3S7</td><td>5</td><td><span class="pill pill-yellow">Pending</span></td><td><span class="pill pill-yellow">Pending</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+              <tr><td>#C004</td><td><b>Ambica Logistics</b></td><td>9876543213</td><td>Vatva</td><td>—</td><td>2</td><td><span class="pill pill-red">Rejected</span></td><td><span class="pill pill-red">Blocked</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+              <tr><td>#C005</td><td><b>Ganesh Trucking</b></td><td>9876543214</td><td>Odhav</td><td>24TUVWX3456Y4Z8</td><td>7</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+              <tr><td>#C006</td><td><b>Shri Fuel Agency</b></td><td>9876543215</td><td>Nikol</td><td>24ABCXY1234A2B3</td><td>4</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Mobile cards -->
+        <div class="m-card-list" style="padding:12px">
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Raj Petrochem</span><span class="pill pill-green">Active</span></div><div class="m-card-grid"><div><div class="lbl">Mobile</div>9876543210</div><div><div class="lbl">Area</div>Nikol</div><div><div class="lbl">Vehicles</div>3</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View Details</button></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Om Industries</span><span class="pill pill-green">Active</span></div><div class="m-card-grid"><div><div class="lbl">Mobile</div>9876543211</div><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">Vehicles</div>1</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View Details</button></div></div>
+          <div class="m-card" style="border-color:var(--yellow)"><div class="m-card-top"><span class="m-card-id">Khodiyar Transport</span><span class="pill pill-yellow">Pending</span></div><div class="m-card-grid"><div><div class="lbl">Mobile</div>9876543212</div><div><div class="lbl">Area</div>Bopal</div><div><div class="lbl">Vehicles</div>5</div><div><div class="lbl">Docs</div><span class="pill pill-yellow">Pending</span></div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View Details</button></div></div>
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">Ambica Logistics</span><span class="pill pill-red">Blocked</span></div><div class="m-card-grid"><div><div class="lbl">Mobile</div>9876543213</div><div><div class="lbl">Area</div>Vatva</div><div><div class="lbl">Vehicles</div>2</div><div><div class="lbl">Docs</div><span class="pill pill-red">Rejected</span></div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View Details</button></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Ganesh Trucking</span><span class="pill pill-green">Active</span></div><div class="m-card-grid"><div><div class="lbl">Mobile</div>9876543214</div><div><div class="lbl">Area</div>Odhav</div><div><div class="lbl">Vehicles</div>7</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('view-customer-modal')">View Details</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ DISTRIBUTORS ══════════ -->
+    <div class="panel" id="panel-distributors">
+      <div class="sec-hd">
+        <h2>Distributors</h2>
+        <div class="search-wrap">
+          <input type="text" placeholder="Search…" oninput="filterTbl('dist-tbl',this.value)" style="min-width:130px"/>
+          <button class="btn btn-primary" onclick="openModal('add-dist-modal')">+ Create</button>
+        </div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl" id="dist-tbl">
+            <thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Area</th><th>Orders</th><th>Failed</th><th>Docs</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>#D001</td><td><b>Shiv Fuel</b></td><td>9898989898</td><td>Nikol</td><td>342</td><td>2</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></td></tr>
+              <tr><td>#D002</td><td><b>Diesel Express</b></td><td>9898989899</td><td>Naroda</td><td>211</td><td>5</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-yellow">Warning</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></td></tr>
+              <tr><td>#D003</td><td><b>FuelMax</b></td><td>9898989900</td><td>Bopal</td><td>178</td><td>1</td><td><span class="pill pill-green">Verified</span></td><td><span class="pill pill-green">Active</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-success btn-sm">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></td></tr>
+              <tr><td>#D004</td><td><b>Vatva Fuels</b></td><td>9898989901</td><td>Vatva</td><td>89</td><td>0</td><td><span class="pill pill-yellow">Pending</span></td><td><span class="pill pill-yellow">Pending</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">Reject</button></td></tr>
+              <tr><td>#D005</td><td><b>Odhav Petroleum</b></td><td>9898989902</td><td>Odhav</td><td>0</td><td>0</td><td><span class="pill pill-red">Suspended</span></td><td><span class="pill pill-red">Suspended</span></td><td><button class="btn btn-success btn-sm" onclick="showToast('Reactivated!')">Reactivate</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="m-card-list" style="padding:12px">
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Shiv Fuel</span><span class="pill pill-green">Active</span></div><div class="m-card-grid"><div><div class="lbl">Area</div>Nikol</div><div><div class="lbl">Orders Done</div>342</div><div><div class="lbl">Failed</div>2</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-success btn-sm" onclick="showToast('Active!')">✓ Active</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></div></div>
+          <div class="m-card" style="border-color:var(--yellow)"><div class="m-card-top"><span class="m-card-id">Diesel Express</span><span class="pill pill-yellow">Warning</span></div><div class="m-card-grid"><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">Orders Done</div>211</div><div><div class="lbl">Failed</div>5</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-success btn-sm" onclick="showToast('Active!')">✓ Active</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">FuelMax</span><span class="pill pill-green">Active</span></div><div class="m-card-grid"><div><div class="lbl">Area</div>Bopal</div><div><div class="lbl">Orders Done</div>178</div><div><div class="lbl">Failed</div>1</div><div><div class="lbl">Docs</div><span class="pill pill-green">Verified</span></div></div><div class="m-card-actions"><button class="btn btn-success btn-sm" onclick="showToast('Active!')">✓ Active</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button></div></div>
+          <div class="m-card" style="border-color:var(--yellow)"><div class="m-card-top"><span class="m-card-id">Vatva Fuels</span><span class="pill pill-yellow">Pending</span></div><div class="m-card-grid"><div><div class="lbl">Area</div>Vatva</div><div><div class="lbl">Orders Done</div>89</div><div><div class="lbl">Failed</div>0</div><div><div class="lbl">Docs</div><span class="pill pill-yellow">Pending</span></div></div><div class="m-card-actions"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">Reject</button></div></div>
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">Odhav Petroleum</span><span class="pill pill-red">Suspended</span></div><div class="m-card-grid"><div><div class="lbl">Area</div>Odhav</div><div><div class="lbl">Orders Done</div>0</div><div><div class="lbl">Failed</div>0</div></div><div class="m-card-actions"><button class="btn btn-success btn-sm" onclick="showToast('Reactivated!')">Reactivate</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ DEPOTS ══════════ -->
+    <div class="panel" id="panel-depots">
+      <div class="sec-hd">
+        <h2>Depots</h2>
+        <button class="btn btn-primary" onclick="openModal('add-depot-modal')">+ Add Depot</button>
+      </div>
+      <div class="depot-grid mb20">
+        <div class="card">
+          <div class="card-hd"><h3>🏭 Naroda Depot</h3><span class="pill pill-green">Active</span></div>
+          <div class="text-muted mb16">Manager: Vikram Shah · 9911002200</div>
+          <div class="prog-item"><div class="prog-meta"><span>Stock Level</span><span style="color:var(--green)">68%</span></div><div class="prog-track"><div class="prog-fill" style="width:68%;background:var(--green)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Capacity Used</span><span style="color:var(--accent)">72%</span></div><div class="prog-track"><div class="prog-fill" style="width:72%;background:var(--accent)"></div></div></div>
+          <div class="flex-row" style="margin-top:12px;flex-wrap:wrap;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="openModal('depot-dispatch-modal')">Dispatch</button>
+            <button class="btn btn-outline btn-sm" onclick="openModal('depot-request-modal')">Stock Request</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>🏭 Odhav Depot</h3><span class="pill pill-yellow">Low Stock</span></div>
+          <div class="text-muted mb16">Manager: Suresh Patel · 9911002201</div>
+          <div class="prog-item"><div class="prog-meta"><span>Stock Level</span><span style="color:var(--red)">21%</span></div><div class="prog-track"><div class="prog-fill" style="width:21%;background:var(--red)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Capacity Used</span><span style="color:var(--yellow)">34%</span></div><div class="prog-track"><div class="prog-fill" style="width:34%;background:var(--yellow)"></div></div></div>
+          <div class="flex-row" style="margin-top:12px;flex-wrap:wrap;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="openModal('depot-dispatch-modal')">Dispatch</button>
+            <button class="btn btn-outline btn-sm" onclick="openModal('depot-request-modal')">Stock Request</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h3>Depot Stock Requests</h3></div>
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl">
+            <thead><tr><th>Depot</th><th>Quantity</th><th>Urgency</th><th>Notes</th><th>Status</th><th>Update</th></tr></thead>
+            <tbody>
+              <tr><td><b>Odhav Depot</b></td><td>5,000 L</td><td><span class="pill pill-red">High</span></td><td>Critically low</td><td><span class="pill pill-blue">In Transit</span></td><td><select onchange="showToast('Status updated!')"><option>Processing</option><option>Dispatch</option><option selected>In Transit</option><option>Delivered</option></select></td></tr>
+              <tr><td><b>Naroda Depot</b></td><td>2,000 L</td><td><span class="pill pill-yellow">Medium</span></td><td>Monthly restock</td><td><span class="pill pill-yellow">Processing</span></td><td><select onchange="showToast('Status updated!')"><option selected>Processing</option><option>Dispatch</option><option>In Transit</option><option>Delivered</option></select></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="m-card-list">
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">Odhav Depot</span><span class="pill pill-red">High Urgency</span></div><div class="m-card-grid"><div><div class="lbl">Quantity</div>5,000 L</div><div><div class="lbl">Status</div><span class="pill pill-blue">In Transit</span></div></div><div style="margin-top:10px"><select onchange="showToast('Status updated!')" style="width:100%"><option>Processing</option><option>Dispatch</option><option selected>In Transit</option><option>Delivered</option></select></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Naroda Depot</span><span class="pill pill-yellow">Medium Urgency</span></div><div class="m-card-grid"><div><div class="lbl">Quantity</div>2,000 L</div><div><div class="lbl">Status</div><span class="pill pill-yellow">Processing</span></div></div><div style="margin-top:10px"><select onchange="showToast('Status updated!')" style="width:100%"><option selected>Processing</option><option>Dispatch</option><option>In Transit</option><option>Delivered</option></select></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ ORDERS ══════════ -->
+    <div class="panel" id="panel-orders">
+      <div class="sec-hd">
+        <h2>Orders</h2>
+        <div class="search-wrap">
+          <input type="text" placeholder="Search…" oninput="filterTbl('orders-tbl',this.value)" style="min-width:120px"/>
+          <select onchange="showToast('Filtered!')"><option value="">All Status</option><option>Pending</option><option>Assigned</option><option>Accepted</option><option>Out For Delivery</option><option>OTP Sent</option><option>Delivered</option><option>Failed</option></select>
+        </div>
+      </div>
+
+      <div class="card mb16">
+        <div class="card-hd"><h3>Order Status Pipeline</h3></div>
+        <div class="flow-steps">
+          <div class="flow-step done" data-n="1">Pending</div>
+          <div class="flow-step done" data-n="2">Assigned</div>
+          <div class="flow-step done" data-n="3">Accepted</div>
+          <div class="flow-step active" data-n="4">Delivery</div>
+          <div class="flow-step" data-n="5">OTP</div>
+          <div class="flow-step" data-n="6">Done</div>
+        </div>
+      </div>
+
+      <div class="tbl-card">
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl" id="orders-tbl">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Area</th><th>Qty (L)</th><th>Distributor</th><th>Date</th><th>Status</th><th>OTP</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><b>ORD-1024</b></td><td>Raj Petrochem</td><td>Nikol</td><td>500</td><td>Shiv Fuel</td><td>18 May</td><td><span class="pill pill-blue">Out For Delivery</span></td><td>—</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1025</b></td><td>Om Industries</td><td>Naroda</td><td>200</td><td>Diesel Express</td><td>18 May</td><td><span class="pill pill-yellow">OTP Sent</span></td><td>✅</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1026</b></td><td>Khodiyar Transport</td><td>Bopal</td><td>1000</td><td>FuelMax</td><td>17 May</td><td><span class="pill pill-green">Delivered</span></td><td>✅</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1027</b></td><td>Ambica Logistics</td><td>Vatva</td><td>750</td><td>Shiv Fuel</td><td>18 May</td><td><span class="pill pill-orange">Pending</span></td><td>—</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1028</b></td><td>Ganesh Trucking</td><td>Odhav</td><td>300</td><td>FuelMax</td><td>17 May</td><td><span class="pill pill-green">Delivered</span></td><td>✅</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1029</b></td><td>Shri Fuel Agency</td><td>Nikol</td><td>400</td><td>Shiv Fuel</td><td>18 May</td><td><span class="pill pill-purple">Accepted</span></td><td>—</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+              <tr><td><b>ORD-1030</b></td><td>Navkar Enterprise</td><td>Naroda</td><td>600</td><td>—</td><td>18 May</td><td><span class="pill pill-gray">Assigned</span></td><td>—</td><td><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">Detail</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="m-card-list" style="padding:12px">
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">ORD-1024</span><span class="pill pill-blue">Out For Delivery</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Raj Petrochem</div><div><div class="lbl">Qty</div>500 L</div><div><div class="lbl">Area</div>Nikol</div><div><div class="lbl">Distributor</div>Shiv Fuel</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">View Detail</button></div></div>
+          <div class="m-card" style="border-color:var(--yellow)"><div class="m-card-top"><span class="m-card-id">ORD-1025</span><span class="pill pill-yellow">OTP Sent</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Om Industries</div><div><div class="lbl">Qty</div>200 L</div><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">OTP</div>✅ Sent</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">View Detail</button></div></div>
+          <div class="m-card" style="border-color:var(--green)"><div class="m-card-top"><span class="m-card-id">ORD-1026</span><span class="pill pill-green">Delivered</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Khodiyar Transport</div><div><div class="lbl">Qty</div>1000 L</div><div><div class="lbl">Area</div>Bopal</div><div><div class="lbl">OTP</div>✅ Verified</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">View Detail</button></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">ORD-1027</span><span class="pill pill-orange">Pending</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Ambica Logistics</div><div><div class="lbl">Qty</div>750 L</div><div><div class="lbl">Area</div>Vatva</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">View Detail</button></div></div>
+          <div class="m-card" style="border-color:var(--green)"><div class="m-card-top"><span class="m-card-id">ORD-1028</span><span class="pill pill-green">Delivered</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Ganesh Trucking</div><div><div class="lbl">Qty</div>300 L</div><div><div class="lbl">Area</div>Odhav</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('order-detail-modal')">View Detail</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ FAILED DELIVERIES ══════════ -->
+    <div class="panel" id="panel-failed">
+      <div class="sec-hd">
+        <h2>Failed Deliveries</h2>
+        <span class="pill pill-red" style="font-size:.82rem;padding:5px 12px">3 Pending Review</span>
+      </div>
+      <div class="card mb16" style="border-left:4px solid var(--red)">
+        <div class="flex-row" style="gap:8px;margin-bottom:6px"><span>⚠️</span><b>Failed Delivery Logic</b></div>
+        <div class="text-muted">Distributor accepts → fails to deliver → System marks failed → Admin Review. Admin can reassign, suspend, or contact customer.</div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Area</th><th>Distributor</th><th>Reason</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><b>ORD-1019</b></td><td>Om Industries</td><td>Naroda</td><td>Diesel Express</td><td>Customer unavailable</td><td>16 May</td><td><span class="pill pill-red">Admin Review</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button><button class="btn btn-outline btn-sm" onclick="showToast('Contacted!')">Contact</button></td></tr>
+              <tr><td><b>ORD-1015</b></td><td>Navkar Enterprise</td><td>Naroda</td><td>Diesel Express</td><td>Vehicle breakdown</td><td>15 May</td><td><span class="pill pill-red">Admin Review</span></td><td class="flex-row" style="gap:5px"><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button><button class="btn btn-outline btn-sm" onclick="showToast('Contacted!')">Contact</button></td></tr>
+              <tr><td><b>ORD-1011</b></td><td>Khodiyar Transport</td><td>Bopal</td><td>FuelMax</td><td>Address mismatch</td><td>14 May</td><td><span class="pill pill-yellow">Resolved</span></td><td><button class="btn btn-success btn-sm">✓ Closed</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="m-card-list" style="padding:12px">
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">ORD-1019</span><span class="pill pill-red">Admin Review</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Om Industries</div><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">Distributor</div>Diesel Express</div><div><div class="lbl">Reason</div>Customer unavailable</div></div><div class="m-card-actions"><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button><button class="btn btn-outline btn-sm" onclick="showToast('Contacted!')">Contact</button></div></div>
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">ORD-1015</span><span class="pill pill-red">Admin Review</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Navkar Enterprise</div><div><div class="lbl">Area</div>Naroda</div><div><div class="lbl">Distributor</div>Diesel Express</div><div><div class="lbl">Reason</div>Vehicle breakdown</div></div><div class="m-card-actions"><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button><button class="btn btn-danger btn-sm" onclick="showToast('Suspended!')">Suspend</button><button class="btn btn-outline btn-sm" onclick="showToast('Contacted!')">Contact</button></div></div>
+          <div class="m-card" style="border-color:var(--green)"><div class="m-card-top"><span class="m-card-id">ORD-1011</span><span class="pill pill-yellow">Resolved</span></div><div class="m-card-grid"><div><div class="lbl">Customer</div>Khodiyar Transport</div><div><div class="lbl">Area</div>Bopal</div><div><div class="lbl">Distributor</div>FuelMax</div><div><div class="lbl">Reason</div>Address mismatch</div></div><div class="m-card-actions"><button class="btn btn-success btn-sm">✓ Closed</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ REPORTS ══════════ -->
+    <div class="panel" id="panel-reports">
+      <div class="sec-hd">
+        <h2>Reports</h2>
+        <div class="search-wrap">
+          <select><option>This Month</option><option>Last Month</option><option>Last 3 Months</option></select>
+          <button class="btn btn-primary" onclick="showToast('Exported!')">⬇ Export</button>
+        </div>
+      </div>
+      <div class="stats-grid mb20">
+        <div class="stat s-blue"><div class="stat-icon">📦</div><div class="stat-label">Orders</div><div class="stat-val">342</div></div>
+        <div class="stat s-green"><div class="stat-icon">✅</div><div class="stat-label">Delivered</div><div class="stat-val">298</div></div>
+        <div class="stat s-red"><div class="stat-icon">❌</div><div class="stat-label">Failed</div><div class="stat-val">12</div></div>
+        <div class="stat s-orange"><div class="stat-icon">⛽</div><div class="stat-label">Diesel (L)</div><div class="stat-val">84K</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><h3>Orders This Week</h3></div>
+          <div class="chart-bar-wrap" id="chart1"></div>
+          <div class="chart-x"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Top Distributors</h3></div>
+          <table class="tbl">
+            <thead><tr><th>Name</th><th>Done</th><th>Failed</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td><b>Shiv Fuel</b></td><td>342</td><td>2</td><td>⭐ 4.8</td></tr>
+              <tr><td><b>FuelMax</b></td><td>211</td><td>1</td><td>⭐ 4.9</td></tr>
+              <tr><td><b>Diesel Express</b></td><td>178</td><td>5</td><td>⭐ 4.1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Orders By Area</h3></div>
+          <div class="prog-item"><div class="prog-meta"><span>Nikol</span><span>28%</span></div><div class="prog-track"><div class="prog-fill" style="width:28%;background:var(--blue)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Naroda</span><span>22%</span></div><div class="prog-track"><div class="prog-fill" style="width:22%;background:var(--accent)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Bopal</span><span>18%</span></div><div class="prog-track"><div class="prog-fill" style="width:18%;background:var(--green)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Vatva</span><span>16%</span></div><div class="prog-track"><div class="prog-fill" style="width:16%;background:var(--purple)"></div></div></div>
+          <div class="prog-item"><div class="prog-meta"><span>Odhav</span><span>16%</span></div><div class="prog-track"><div class="prog-fill" style="width:16%;background:var(--yellow)"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Depot Volume</h3></div>
+          <table class="tbl">
+            <thead><tr><th>Depot</th><th>Dispatched</th><th>Left</th></tr></thead>
+            <tbody>
+              <tr><td><b>Naroda</b></td><td>48,000 L</td><td>32,000 L</td></tr>
+              <tr><td><b>Odhav</b></td><td>36,000 L</td><td>8,000 L</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ NOTIFICATIONS ══════════ -->
+    <div class="panel" id="panel-notifications">
+      <div class="sec-hd">
+        <h2>Notifications</h2>
+        <div class="search-wrap">
+          <select id="notif-filter" onchange="filterNotifs()"><option value="">All</option><option>Orders</option><option>OTP</option><option>Stock</option><option>Failed</option></select>
+          <button class="btn btn-primary" onclick="openModal('send-notif-modal')">📢 Send</button>
+        </div>
+      </div>
+      <div id="notif-list">
+        <div class="notif-item green-b" data-cat="OTP"><div class="notif-icon">✅</div><div style="flex:1"><div class="notif-title">OTP Verified — ORD-1025</div><div class="notif-body">Om Industries confirmed delivery via OTP.</div><div class="notif-time">Today, 2:14 PM · Diesel Express</div></div><span class="pill pill-green">OTP</span></div>
+        <div class="notif-item blue-b" data-cat="Orders"><div class="notif-icon">📦</div><div style="flex:1"><div class="notif-title">New Order — ORD-1030</div><div class="notif-body">Navkar Enterprise placed 600L order. Assigned to Diesel Express.</div><div class="notif-time">Today, 1:45 PM · Naroda</div></div><span class="pill pill-blue">Orders</span></div>
+        <div class="notif-item red-b" data-cat="Failed"><div class="notif-icon">⚠️</div><div style="flex:1"><div class="notif-title">Failed Delivery — ORD-1019</div><div class="notif-body">Diesel Express failed in Naroda. Admin review required.</div><div class="notif-time">Today, 11:30 AM</div></div><span class="pill pill-red">Failed</span></div>
+        <div class="notif-item" data-cat="Stock"><div class="notif-icon">🏭</div><div style="flex:1"><div class="notif-title">Stock Request — Odhav Depot</div><div class="notif-body">5,000L requested — critically low stock (21%).</div><div class="notif-time">Today, 10:15 AM</div></div><span class="pill pill-orange">Stock</span></div>
+        <div class="notif-item blue-b" data-cat="Orders"><div class="notif-icon">🚚</div><div style="flex:1"><div class="notif-title">Out For Delivery — ORD-1024</div><div class="notif-body">Shiv Fuel started delivery to Raj Petrochem, Nikol.</div><div class="notif-time">Today, 9:00 AM</div></div><span class="pill pill-blue">Orders</span></div>
+        <div class="notif-item green-b" data-cat="OTP"><div class="notif-icon">✅</div><div style="flex:1"><div class="notif-title">OTP Verified — ORD-1026</div><div class="notif-body">Khodiyar Transport delivery confirmed, Bopal.</div><div class="notif-time">Yesterday, 4:30 PM</div></div><span class="pill pill-green">OTP</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════ AREA MANAGEMENT ══════════ -->
+    <div class="panel" id="panel-area">
+      <div class="sec-hd">
+        <h2>Area Management</h2>
+        <button class="btn btn-primary" onclick="openModal('add-area-modal')">+ Add Area</button>
+      </div>
+      <div class="area-map">
+        <div style="font-size:2rem">🗺️</div>
+        <div>Live Map — Ahmedabad Zones</div>
+        <div style="font-size:.75rem;color:var(--blue);opacity:.7">GPS tracking (Future Feature)</div>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-wrap desktop-tbl">
+          <table class="tbl">
+            <thead><tr><th>Area</th><th>Pincode</th><th>Distributor</th><th>Active Orders</th><th>Customers</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><b>Nikol</b></td><td>382350</td><td><span class="pill pill-green">Shiv Fuel</span></td><td>4</td><td>12</td><td class="flex-row" style="gap:5px"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></td></tr>
+              <tr><td><b>Naroda</b></td><td>382330</td><td><span class="pill pill-yellow">Diesel Express</span></td><td>3</td><td>8</td><td class="flex-row" style="gap:5px"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></td></tr>
+              <tr><td><b>Bopal</b></td><td>380058</td><td><span class="pill pill-green">FuelMax</span></td><td>2</td><td>6</td><td class="flex-row" style="gap:5px"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></td></tr>
+              <tr><td><b>Vatva</b></td><td>382445</td><td><span class="pill pill-green">Vatva Fuels</span></td><td>1</td><td>4</td><td class="flex-row" style="gap:5px"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></td></tr>
+              <tr><td><b>Odhav</b></td><td>382415</td><td><span class="pill pill-red">None</span></td><td>0</td><td>5</td><td class="flex-row" style="gap:5px"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Assigned!')">Assign</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="m-card-list" style="padding:12px">
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Nikol</span><span class="pill pill-green">Shiv Fuel</span></div><div class="m-card-grid"><div><div class="lbl">Pincode</div>382350</div><div><div class="lbl">Active Orders</div>4</div><div><div class="lbl">Customers</div>12</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></div></div>
+          <div class="m-card" style="border-color:var(--yellow)"><div class="m-card-top"><span class="m-card-id">Naroda</span><span class="pill pill-yellow">Diesel Express</span></div><div class="m-card-grid"><div><div class="lbl">Pincode</div>382330</div><div><div class="lbl">Active Orders</div>3</div><div><div class="lbl">Customers</div>8</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></div></div>
+          <div class="m-card"><div class="m-card-top"><span class="m-card-id">Bopal</span><span class="pill pill-green">FuelMax</span></div><div class="m-card-grid"><div><div class="lbl">Pincode</div>380058</div><div><div class="lbl">Active Orders</div>2</div><div><div class="lbl">Customers</div>6</div></div><div class="m-card-actions"><button class="btn btn-outline btn-sm" onclick="openModal('edit-area-modal')">Edit</button><button class="btn btn-primary btn-sm" onclick="showToast('Reassigned!')">Reassign</button></div></div>
+          <div class="m-card" style="border-color:var(--red)"><div class="m-card-top"><span class="m-card-id">Odhav</span><span class="pill pill-red">No Distributor</span></div><div class="m-card-grid"><div><div class="lbl">Pincode</div>382415</div><div><div class="lbl">Active Orders</div>0</div><div><div class="lbl">Customers</div>5</div></div><div class="m-card-actions"><button class="btn btn-primary btn-sm" onclick="showToast('Assigned!')">Assign</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ DOCUMENT VERIFICATION ══════════ -->
+    <div class="panel" id="panel-documents">
+      <div class="sec-hd">
+        <h2>Document Verification</h2>
+        <select><option>All</option><option>Customers</option><option>Distributors</option></select>
+      </div>
+      <div class="g2">
+        <div>
+          <h3 style="font-family:'Syne',sans-serif;margin-bottom:12px;font-size:.95rem">Customer Documents</h3>
+          <div class="doc-card"><div class="doc-icon">🪪</div><div class="doc-info"><strong>Aadhaar — Khodiyar Transport</strong><span>#C003 · 17 May</span></div><div class="doc-actions"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">✗</button></div></div>
+          <div class="doc-card"><div class="doc-icon">📄</div><div class="doc-info"><strong>PAN Card — Khodiyar Transport</strong><span>#C003 · 17 May</span></div><div class="doc-actions"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">✗</button></div></div>
+          <div class="doc-card"><div class="doc-icon">🚛</div><div class="doc-info"><strong>Vehicle RC — Raj Petrochem</strong><span>#C001 · Verified</span></div><div class="doc-actions"><span class="pill pill-green">Verified</span></div></div>
+          <div class="doc-card"><div class="doc-icon">📋</div><div class="doc-info"><strong>GST — Om Industries</strong><span>#C002 · Verified</span></div><div class="doc-actions"><span class="pill pill-green">Verified</span></div></div>
+        </div>
+        <div>
+          <h3 style="font-family:'Syne',sans-serif;margin-bottom:12px;font-size:.95rem">Distributor Documents</h3>
+          <div class="doc-card"><div class="doc-icon">🪪</div><div class="doc-info"><strong>Aadhaar — Vatva Fuels</strong><span>#D004 · 18 May</span></div><div class="doc-actions"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">✗</button></div></div>
+          <div class="doc-card"><div class="doc-icon">📜</div><div class="doc-info"><strong>Trade License — Vatva Fuels</strong><span>#D004 · 18 May</span></div><div class="doc-actions"><button class="btn btn-success btn-sm" onclick="showToast('Approved!')">✓</button><button class="btn btn-danger btn-sm" onclick="showToast('Rejected!')">✗</button></div></div>
+          <div class="doc-card"><div class="doc-icon">📄</div><div class="doc-info"><strong>PAN — Shiv Fuel</strong><span>#D001 · Verified</span></div><div class="doc-actions"><span class="pill pill-green">Verified</span></div></div>
+          <div class="doc-card"><div class="doc-icon">🪪</div><div class="doc-info"><strong>Aadhaar — Diesel Express</strong><span>#D002 · Verified</span></div><div class="doc-actions"><span class="pill pill-green">Verified</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SETTINGS ══════════ -->
+    <div class="panel" id="panel-settings">
+      <div class="sec-hd"><h2>Settings</h2></div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><h3>Admin Profile</h3></div>
+          <div class="form-group"><label>Full Name</label><input type="text" value="Admin User"/></div>
+          <div class="form-group"><label>Email</label><input type="text" value="admin@dieselflow.in"/></div>
+          <div class="form-group"><label>Mobile</label><input type="text" value="9876500000"/></div>
+          <button class="btn btn-primary" onclick="showToast('Profile saved!')">Save Changes</button>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>System Settings</h3></div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:.855rem">
+            <div class="int-row"><span style="flex:1"><b>WhatsApp Notifications</b></span><input type="checkbox" checked onchange="showToast(this.checked?'WhatsApp ON':'WhatsApp OFF')"/></div>
+            <div class="int-row"><span style="flex:1"><b>OTP Verification</b></span><input type="checkbox" checked onchange="showToast(this.checked?'OTP ON':'OTP OFF')"/></div>
+            <div class="int-row"><span style="flex:1"><b>Auto Distributor Assign</b></span><input type="checkbox" checked onchange="showToast(this.checked?'Auto-assign ON':'OFF')"/></div>
+            <div class="int-row"><span style="flex:1"><b>Failed Delivery Alert</b></span><input type="checkbox" checked onchange="showToast(this.checked?'Alerts ON':'OFF')"/></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Integrations</h3></div>
+          <div class="form-group"><label>MSG91 API Key</label><input type="text" value="MSG91-XXXX-YYYY"/></div>
+          <div class="form-group"><label>WhatsApp Token</label><input type="text" value="WA-TOKEN-••••••••"/></div>
+          <div class="form-group"><label>FCM Server Key</label><input type="text" value="FCM-••••••••••"/></div>
+          <button class="btn btn-primary" onclick="showToast('Keys saved!')">Save Keys</button>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>Security</h3></div>
+          <div class="int-row"><span>🔒 JWT Auth</span><span class="pill pill-green ml-auto">Enabled</span></div>
+          <div class="int-row"><span>🛡️ Role-Based Access</span><span class="pill pill-green ml-auto">Enabled</span></div>
+          <div class="int-row"><span>📝 Audit Logs</span><span class="pill pill-green ml-auto">Enabled</span></div>
+          <div class="int-row"><span>☁️ Cloudflare WAF</span><span class="pill pill-green ml-auto">Active</span></div>
+          <button class="btn btn-outline" style="margin-top:14px;width:100%" onclick="showToast('Audit log downloaded!')">⬇ Download Audit Log</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ══════════ BOTTOM NAV (mobile) ══════════ -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-items">
+    <button class="bn-item active" id="bn-dashboard" onclick="show('dashboard',null);setBN('bn-dashboard')"><span>🏠</span><span>Home</span></button>
+    <button class="bn-item" id="bn-orders" onclick="show('orders',null);setBN('bn-orders')"><span>📦</span><span>Orders</span></button>
+    <button class="bn-item" id="bn-distributors" onclick="show('distributors',null);setBN('bn-distributors')"><span>🚚</span><span>Distrib.</span></button>
+    <button class="bn-item" id="bn-failed" onclick="show('failed',null);setBN('bn-failed')"><span>❌</span><span>Failed</span></button>
+    <button class="bn-item" id="bn-menu" onclick="toggleSidebar()"><span>☰</span><span>Menu</span></button>
+  </div>
+</nav>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Add Customer -->
+<div class="modal-overlay" id="add-customer-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>➕ Add New Customer</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Full Name</label><input type="text" placeholder="Business Name"/></div>
+      <div class="form-group"><label>Mobile</label><input type="text" placeholder="Mobile Number"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Area</label><select><option>Nikol</option><option>Naroda</option><option>Bopal</option><option>Vatva</option><option>Odhav</option></select></div>
+      <div class="form-group"><label>GST Number</label><input type="text" placeholder="GST Number"/></div>
+    </div>
+    <div class="form-group"><label>Address</label><input type="text" placeholder="Full Address"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('add-customer-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('add-customer-modal');showToast('Customer added!')">Add Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Customer -->
+<div class="modal-overlay" id="view-customer-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>👤 Raj Petrochem</h3>
+    <div class="g2" style="margin-bottom:12px">
+      <div><div class="text-muted">Mobile</div><b>9876543210</b></div>
+      <div><div class="text-muted">Area</div><b>Nikol</b></div>
+      <div><div class="text-muted">GST</div><b>24ABCDE1234F1Z5</b></div>
+      <div><div class="text-muted">Status</div><span class="pill pill-green">Active</span></div>
+    </div>
+    <div style="margin-bottom:12px"><div class="text-muted" style="margin-bottom:6px">Vehicles</div>
+      <span class="tag">🚛 GJ01AB1234</span><span class="tag">🚛 GJ01CD5678</span><span class="tag">🚛 GJ01EF9012</span>
+    </div>
+    <div style="margin-bottom:12px"><div class="text-muted" style="margin-bottom:6px">Documents</div>
+      <span class="tag">🪪 Aadhaar ✅</span><span class="tag">📄 PAN ✅</span><span class="tag">📋 GST ✅</span>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="closeModal('view-customer-modal');showToast('Blocked!')">Block</button>
+      <button class="btn btn-outline" onclick="closeModal('view-customer-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Distributor -->
+<div class="modal-overlay" id="add-dist-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>🚚 Create Distributor Account</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Business Name</label><input type="text" placeholder="Name"/></div>
+      <div class="form-group"><label>Mobile</label><input type="text" placeholder="Mobile"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Area Assigned</label><select><option>Nikol</option><option>Naroda</option><option>Bopal</option><option>Vatva</option><option>Odhav</option></select></div>
+      <div class="form-group"><label>Password</label><input type="text" placeholder="Set Password"/></div>
+    </div>
+    <div class="form-group"><label>Address</label><input type="text" placeholder="Business Address"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('add-dist-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('add-dist-modal');showToast('Account created & credentials sent!')">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Depot Dispatch -->
+<div class="modal-overlay" id="depot-dispatch-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>🚛 Dispatch Diesel</h3>
+    <div class="form-group"><label>Select Depot</label><select><option>Naroda Depot</option><option>Odhav Depot</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label>Quantity (L)</label><input type="text" placeholder="e.g. 5000"/></div>
+      <div class="form-group"><label>Vehicle No.</label><input type="text" placeholder="GJ01TK1234"/></div>
+    </div>
+    <div class="form-group"><label>Expected Arrival</label><input type="text" placeholder="Date & Time"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('depot-dispatch-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('depot-dispatch-modal');showToast('Dispatch initiated!')">Dispatch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Depot Stock Request -->
+<div class="modal-overlay" id="depot-request-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>📥 Stock Request</h3>
+    <div class="form-group"><label>Quantity (L)</label><input type="text" placeholder="e.g. 3000"/></div>
+    <div class="form-group"><label>Urgency</label><select><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select></div>
+    <div class="form-group"><label>Notes</label><input type="text" placeholder="Reason for request"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('depot-request-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('depot-request-modal');showToast('Request sent!')">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Depot -->
+<div class="modal-overlay" id="add-depot-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>🏭 Add Depot</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Depot Name</label><input type="text" placeholder="Name"/></div>
+      <div class="form-group"><label>Area</label><select><option>Nikol</option><option>Naroda</option><option>Bopal</option><option>Vatva</option><option>Odhav</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Manager Name</label><input type="text" placeholder="Manager"/></div>
+      <div class="form-group"><label>Manager Mobile</label><input type="text" placeholder="Mobile"/></div>
+    </div>
+    <div class="form-group"><label>Total Capacity (L)</label><input type="text" placeholder="e.g. 50000"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('add-depot-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('add-depot-modal');showToast('Depot added!')">Add Depot</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail -->
+<div class="modal-overlay" id="order-detail-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>📦 ORD-1024 — Raj Petrochem</h3>
+    <div class="g2" style="margin-bottom:14px">
+      <div><div class="text-muted">Customer</div><b>Raj Petrochem</b></div>
+      <div><div class="text-muted">Distributor</div><b>Shiv Fuel</b></div>
+      <div><div class="text-muted">Area</div><b>Nikol</b></div>
+      <div><div class="text-muted">Quantity</div><b>500 L</b></div>
+      <div><div class="text-muted">Date</div><b>18 May 2026</b></div>
+      <div><div class="text-muted">OTP Status</div><span class="pill pill-yellow">Pending</span></div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="text-muted" style="margin-bottom:10px">Status Timeline</div>
+      <ul class="timeline">
+        <li class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-text"><strong>Pending</strong><span>18 May · 8:00 AM</span></div></li>
+        <li class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-text"><strong>Distributor Assigned</strong><span>18 May · 8:05 AM — Shiv Fuel</span></div></li>
+        <li class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-text"><strong>Accepted</strong><span>18 May · 8:12 AM</span></div></li>
+        <li class="tl-item"><div class="tl-dot tl-active">→</div><div class="tl-text"><strong>Out For Delivery</strong><span>18 May · 9:00 AM — In progress</span></div></li>
+        <li class="tl-item"><div class="tl-dot tl-pending">5</div><div class="tl-text"><strong>OTP Sent</strong><span>—</span></div></li>
+        <li class="tl-item"><div class="tl-dot tl-pending">6</div><div class="tl-text"><strong>Delivered</strong><span>—</span></div></li>
+      </ul>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="closeModal('order-detail-modal');showToast('Order cancelled!')">Cancel Order</button>
+      <button class="btn btn-primary" onclick="closeModal('order-detail-modal');showToast('Reassigned!')">Reassign</button>
+      <button class="btn btn-outline" onclick="closeModal('order-detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send Notification -->
+<div class="modal-overlay" id="send-notif-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>📢 Send Notification</h3>
+    <div class="form-group"><label>Send To</label><select><option>All Users</option><option>All Customers</option><option>All Distributors</option><option>All Depots</option></select></div>
+    <div class="form-group"><label>Channel</label><select><option>In-App + WhatsApp</option><option>In-App Only</option><option>WhatsApp Only</option><option>SMS</option></select></div>
+    <div class="form-group"><label>Title</label><input type="text" placeholder="Notification Title"/></div>
+    <div class="form-group"><label>Message</label><input type="text" placeholder="Message…"/></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('send-notif-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('send-notif-modal');showToast('Notification sent!')">Send Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Area -->
+<div class="modal-overlay" id="add-area-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>🗺️ Add New Area</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Area Name</label><input type="text" placeholder="e.g. Gota"/></div>
+      <div class="form-group"><label>Pincode</label><input type="text" placeholder="382481"/></div>
+    </div>
+    <div class="form-group"><label>Assign Distributor</label><select><option>Shiv Fuel</option><option>FuelMax</option><option>Diesel Express</option></select></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('add-area-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('add-area-modal');showToast('Area added!')">Add Area</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Area -->
+<div class="modal-overlay" id="edit-area-modal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <h3>✏️ Edit Area — Nikol</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Area Name</label><input type="text" value="Nikol"/></div>
+      <div class="form-group"><label>Pincode</label><input type="text" value="382350"/></div>
+    </div>
+    <div class="form-group"><label>Assigned Distributor</label><select><option selected>Shiv Fuel</option><option>FuelMax</option><option>Diesel Express</option></select></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal('edit-area-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('edit-area-modal');showToast('Area updated!')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const titles={dashboard:'Dashboard',customers:'Customers',distributors:'Distributors',depots:'Depots',orders:'Orders',failed:'Failed Deliveries',reports:'Reports',notifications:'Notifications',area:'Area Management',documents:'Doc Verification',settings:'Settings'};
+
+function show(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el && el.classList.contains('nav-item')) el.classList.add('active');
+  else{
+    // find matching nav-item
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.textContent.trim().startsWith(titles[id]?.substring(0,5)||'')) n.classList.add('active');
+    });
+  }
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(id==='reports') setTimeout(buildChart,100);
+  closeSidebar();
+  window.scrollTo&&window.scrollTo(0,0);
+}
+
+function filterTbl(id,q){
+  document.getElementById(id).querySelectorAll('tbody tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+function filterNotifs(){
+  const val=document.getElementById('notif-filter').value;
+  document.querySelectorAll('#notif-list .notif-item').forEach(n=>{
+    n.style.display=(!val||n.dataset.cat===val)?'flex':'none';
+  });
+}
+
+// Sidebar
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  const o=document.getElementById('sidebar-overlay');
+  const open=s.classList.toggle('open');
+  o.classList.toggle('open',open);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// Modal
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+});
+
+// Bottom nav
+function setBN(id){
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+// Toast
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.transform='translateX(-50%) translateY(0)';
+  t.style.opacity='1';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.style.transform='translateX(-50%) translateY(80px)';t.style.opacity='0'},2600);
+}
+
+// Chart
+function buildChart(){
+  const data=[28,45,32,61,54,38,47];
+  const max=Math.max(...data);
+  const wrap=document.getElementById('chart1');
+  if(!wrap)return;
+  wrap.innerHTML=data.map((v,i)=>`<div class="chart-bar" style="height:${(v/max*100)}%;background:${i===4?'var(--blue)':'var(--accent)'}" onclick="showToast('${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}: ${v} orders')"></div>`).join('');
+}
+</script>
+</body>
+</html>
